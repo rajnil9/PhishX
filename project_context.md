@@ -13,7 +13,7 @@ This document serves as a complete context-transfer bridge for any future AI ses
 *   `malware`: Links hosting or distributing malicious binaries.
 *   `defacement`: Hacked websites displaying unauthorized content.
 
-**2. Email Classification (NLP - Multi-Modal Random Forest, Security-First 5-Class):**
+**2. Email Classification (NLP - Multi-Modal LinearSVC, Security-First 5-Class):**
 *   `ham`: Legitimate personal, business, or transactional emails.
 *   `promotional`: Marketing newsletters, retail ads, and updates (unsolicited but safe).
 *   `phishing`: Deceptive emails masquerading as trusted brands to steal credentials.
