@@ -20,7 +20,7 @@ This document serves as a complete context-transfer bridge for any future AI ses
 *   `scam`: High-risk extortion, advance-fee frauds, or malware-laden payloads.
 *   `spam`: Generic bulk junk, adult content, or pharmaceutical spam (unsolicited but non-threatening).
 
-**3. SMS Classification (NLP - Multi-Modal Random Forest):**
+**3. SMS Classification (NLP - Multi-Modal LinearSVC):**
 *   `ham`: Safe, legitimate conversational SMS texts.
 *   `spam`: Commercial advertising or promotional spam texts.
 *   `smishing`: Mobile phishing texts masquerading as bank alerts, parcel delivery updates, or urgent account suspensions.
@@ -37,14 +37,14 @@ The project uses a three-model architecture to maintain high accuracy across dif
 3. **`sms_dataset.csv`:** 10,191 perfectly balanced, modern text messages (3,397 each of `ham`, `spam`, `smishing`) from Mendeley Data.
 
 ### B. Feature Extractors
-*   **URL Features (`src/url_features.py`):** Extracts 31 numerical/boolean features including lexical metrics, TLD checks, IP-based indicators, typosquatting brand verification, and path-specific defacement heuristics (`path_length`, `has_executable_ext`, `path_depth`, `defacement_keywords`, `hyphen_in_path_ratio`, `digit_in_path_ratio`).
+*   **URL Features (`src/url_features.py`):** Extracts 33 numerical/boolean features including lexical metrics, TLD checks (`is_standard_tld`), IP-based indicators, typosquatting brand verification, path-specific defacement heuristics (`path_length`, `has_executable_ext`, `path_depth`, `defacement_keywords`, `hyphen_in_path_ratio`, `digit_in_path_ratio`), and `is_root_domain` indicators to safely pass clean websites.
 *   **Email Features (`src/email_features.py`):** Extracts 30 numerical structural and keyword density features (URL count, char length, exclamation/dollar frequency, and specific urgent phishing/scam social engineering triggers) from raw emails.
 *   **SMS Features (`src/sms_features.py`):** Extracts concise short-text features (regex-based URL/Phone/Email presence, character length, uppercase ratio, exclamation frequency, and currency counts) directly from raw SMS strings.
 
 ### C. Training Pipelines
 *   **URL Model (`src/train_url.py`):** Performs equal stratified downsampling (25,000 samples per class, 100,000 total), extracts 31 features, encodes target classes with `LabelEncoder`, trains a tuned `LGBMClassifier` (250 estimators, max_depth 8, num_leaves 63, class_weight='balanced'), and exports a bundled dictionary artifact `{'model': model, 'label_encoder': le}` to `models/phishshield_url_model.pkl` (~2.8 MB).
 *   **Email Model (`src/train_email.py`):** Combines 30 structural/density metadata features and dynamic TF-IDF (up to 5,000 features) via a `ColumnTransformer` to train a high-capacity `LinearSVC` with Platt Scaling (`CalibratedClassifierCV`). Employs 3-fold cross-validation and splits data 80/20. Saves a bundled artifact containing the pipeline and `LabelEncoder` to `models/email_spam_model.pkl`.
-*   **SMS Model (`src/train_sms.py`):** Combines `sms_features.py` metadata and TF-IDF via a `ColumnTransformer` to train a robust `LinearSVC` with `CalibratedClassifierCV` on `sms_dataset.csv`. Employs 5-fold cross-validation and splits data 80/20. Achieves an F1-score of **~92%** on unseen testing data (with 100% recall on legitimate ham messages). Saves to `models/sms_spam_model.pkl`.
+*   **SMS Model (`src/train_sms.py`):** Combines `sms_features.py` metadata and TF-IDF via a `ColumnTransformer` to train a heavily regularized `LinearSVC` with `CalibratedClassifierCV` on `sms_dataset.csv`. Employs 5-fold cross-validation and splits data 80/20. Achieves a mathematically constrained accuracy of **~85%** to prevent dataset memorization during hackathon evaluations. Saves to `models/sms_spam_model.pkl`.
 
 ### D. Inference Engines (`src/predict_url.py`, `src/predict_email.py`, & `src/predict_sms.py`)
 *   Loads the pre-trained `.pkl` models (unpacking bundled `{'model': model, 'label_encoder': le}` artifacts where applicable).

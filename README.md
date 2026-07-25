@@ -9,7 +9,7 @@
 ### 1. URL Threat Classifier (LightGBM)
 * **Classes**: `benign`, `phishing`, `malware`, `defacement`.
 * **Model**: High-performance `lightgbm.LGBMClassifier` bundled with `LabelEncoder`.
-* **Feature Extraction**: 31 lexical, structural, typosquatting, and path-specific defacement features (`path_length`, `has_executable_ext`, `path_depth`, `defacement_keywords`, etc.).
+* **Feature Extraction**: 33 lexical, structural, typosquatting, and path-specific defacement features (`path_length`, `has_executable_ext`, `path_depth`, `defacement_keywords`, `is_root_domain`, etc.).
 * **Model Size**: Highly optimized (~2.8 MB).
 * **Performance**: **84% Generalization Accuracy**, **86% Defacement F1-score**.
 
@@ -26,7 +26,7 @@
 * **Classes**: `ham`, `spam`, `smishing`.
 * **Model**: `Calibrated LinearSVC` trained on 10,191 modern mobile texts.
 * **Feature Extraction**: TF-IDF combined with short-text mobile metrics (phone counts, shortcodes, URL presence, shouting ratio).
-* **Performance**: **~93% Generalization Accuracy** (100% recall on safe `ham` messages).
+* **Performance**: **~85% Generalization Accuracy** (Heavily regularized to prevent dataset memorization).
 
 ---
 
