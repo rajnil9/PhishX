@@ -96,7 +96,7 @@ The raw URL strings are parsed to extract structural, keyword, and path-level in
 
 ### A. The Dataset
 *   **Total Dataset Size:** 23,332 rows, highly balanced across 5 classes.
-*   **Data Aggregation:** Compiled from 7 historical/modern email datasets: Enron, Nazario Phishing, SpamAssassin, CEAS 2008, Ling-Spam, and Nigerian Fraud.
+*   **Data Aggregation:** Trained on a modern two-class `Phishing_Email.csv` dataset.
 *   **Categories (5 classes):**
     *   `ham`: Clean, normal business/personal emails.
     *   `promotional`: Marketing newsletters, product announcements (contain coupon codes or unsubscribe paths).
@@ -114,13 +114,13 @@ A hybrid pipeline processes textual and structured metadata simultaneously:
     *   `uppercase_ratio`: Detects "shouting" / capitalization pressure.
     *   `exclamation_count` & `dollar_count`: Spam punctuation features.
     *   `urgent_words` & `scam_words`: Keyword frequency arrays matching specific social engineering vectors.
-3. **Pipeline Merging:** Uses `ColumnTransformer` to combine TF-IDF (applied to text) and numerical passing features, feeding the single merged matrix to a parallelized `RandomForestClassifier` (`n_jobs=-1`, 50 trees).
+3. **Pipeline Merging:** Uses `ColumnTransformer` to combine TF-IDF (applied to text) and numerical passing features, feeding the single merged matrix to a `LinearSVC` paired with a `CalibratedClassifierCV` for platt scaled probabilistic outputs.
 
 ```
 [Raw Email String]
        │
        ├──> [Text Extraction] ──> [TF-IDF Vectorizer (5,000 features)] ──┐
-       │                                                                  ├──> [ColumnTransformer] ──> [RandomForestClassifier] ──> Initial Prediction
+       │                                                                  ├──> [ColumnTransformer] ──> [Calibrated LinearSVC] ──> Initial Prediction
        └──> [Metadata Engine] ──> [30 Numerical structural metrics] ──────┘
 ```
 

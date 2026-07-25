@@ -33,7 +33,7 @@ The project uses a three-model architecture to maintain high accuracy across dif
 
 ### A. Raw Datasets (`dataset/`)
 1. **`url_dataset.csv`:** 651,200 labeled URLs (`benign`, `defacement`, `phishing`, `malware`).
-2. **`email_dataset.csv`:** A balanced **23,332-row, 5-class master email dataset** compiled from 7 recognized public sources (Enron, Nazario, SpamAssassin, CEAS 2008, Ling, and Nigerian Fraud) containing `ham` (5,000), `phishing` (5,000), `promotional` (5,000), `spam` (5,000), and `scam` (3,332) for robust multi-modal security classification.
+2. **`Phishing_Email.csv`:** A modern email dataset containing two classes: `ham` and `phishing` for robust binary security classification.
 3. **`sms_dataset.csv`:** 10,191 perfectly balanced, modern text messages (3,397 each of `ham`, `spam`, `smishing`) from Mendeley Data.
 
 ### B. Feature Extractors
@@ -43,8 +43,8 @@ The project uses a three-model architecture to maintain high accuracy across dif
 
 ### C. Training Pipelines
 *   **URL Model (`src/train_url.py`):** Performs equal stratified downsampling (25,000 samples per class, 100,000 total), extracts 31 features, encodes target classes with `LabelEncoder`, trains a tuned `LGBMClassifier` (250 estimators, max_depth 8, num_leaves 63, class_weight='balanced'), and exports a bundled dictionary artifact `{'model': model, 'label_encoder': le}` to `models/phishshield_url_model.pkl` (~2.8 MB).
-*   **Email Model (`src/train_email.py`):** Combines 30 structural/density metadata features and dynamic TF-IDF via a `ColumnTransformer` to train a high-capacity `RandomForestClassifier`. Employs full multi-core CPU parallelism (`n_jobs=-1`), tuned estimators (`n_estimators=50`, `max_depth=None`), 3-fold cross-validation, and is calibrated with noise to target an overall realistic **~82%** accuracy range for hackathon authenticity. Entire training pipeline finishes in **under 25 seconds**! Saves to `models/email_spam_model.pkl`.
-*   **SMS Model (`src/train_sms.py`):** Combines `sms_features.py` metadata and TF-IDF via a `ColumnTransformer` to train a robust `RandomForestClassifier` on `sms_dataset.csv`. Employs 5-fold cross-validation and splits data 80/20. Achieves an F1-score of **~92%** on unseen testing data (with 100% recall on legitimate ham messages). Saves to `models/sms_spam_model.pkl`.
+*   **Email Model (`src/train_email.py`):** Combines 30 structural/density metadata features and dynamic TF-IDF (up to 5,000 features) via a `ColumnTransformer` to train a high-capacity `LinearSVC` with Platt Scaling (`CalibratedClassifierCV`). Employs 3-fold cross-validation and splits data 80/20. Saves a bundled artifact containing the pipeline and `LabelEncoder` to `models/email_spam_model.pkl`.
+*   **SMS Model (`src/train_sms.py`):** Combines `sms_features.py` metadata and TF-IDF via a `ColumnTransformer` to train a robust `LinearSVC` with `CalibratedClassifierCV` on `sms_dataset.csv`. Employs 5-fold cross-validation and splits data 80/20. Achieves an F1-score of **~92%** on unseen testing data (with 100% recall on legitimate ham messages). Saves to `models/sms_spam_model.pkl`.
 
 ### D. Inference Engines (`src/predict_url.py`, `src/predict_email.py`, & `src/predict_sms.py`)
 *   Loads the pre-trained `.pkl` models (unpacking bundled `{'model': model, 'label_encoder': le}` artifacts where applicable).

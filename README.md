@@ -14,8 +14,8 @@
 * **Performance**: **84% Generalization Accuracy**, **86% Defacement F1-score**.
 
 ### 2. Multi-Modal Email Threat Engine (NLP + 3-Layer Safeguards)
-* **Classes**: `ham`, `promotional`, `phishing`, `scam`, `spam`.
-* **Model**: Parallelized `RandomForestClassifier` trained on a balanced 23,332-email dataset.
+* **Classes**: `ham`, `phishing`.
+* **Model**: `Calibrated LinearSVC` trained on the `Phishing_Email.csv` dataset.
 * **Architecture**: Multi-modal `ColumnTransformer` combining TF-IDF (5,000 features) and 30 numerical structural/density metrics.
 * **3-Layer Security Pipeline**:
   - **Layer 1 (Stacked Link Scanning)**: Runs embedded links through the trained URL model.
@@ -24,7 +24,7 @@
 
 ### 3. Mobile SMS / Smishing Classifier (NLP)
 * **Classes**: `ham`, `spam`, `smishing`.
-* **Model**: `RandomForestClassifier` trained on 10,191 modern mobile texts.
+* **Model**: `Calibrated LinearSVC` trained on 10,191 modern mobile texts.
 * **Feature Extraction**: TF-IDF combined with short-text mobile metrics (phone counts, shortcodes, URL presence, shouting ratio).
 * **Performance**: **~93% Generalization Accuracy** (100% recall on safe `ham` messages).
 
