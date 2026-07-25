@@ -127,7 +127,7 @@ def extract_features(url):
         # 4. THREAT INTELLIGENCE: SUSPICIOUS TLDs & SHORTENERS
         # ---------------------------------------------------------
         # Standard trusted TLDs vs high-risk abused TLDs
-        standard_tlds = {'com', 'org', 'net', 'edu', 'gov', 'io', 'co', 'uk', 'de', 'ca', 'app', 'dev', 'ai', 'in', 'design', 'tech', 'me', 'site', 'cloud', 'studio', 'online', 'store', 'space', 'agency', 'digital'}
+        standard_tlds = {'com', 'org', 'net', 'edu', 'gov', 'io', 'co', 'uk', 'de', 'ca', 'app', 'dev', 'ai', 'in', 'design', 'tech', 'me', 'site', 'cloud', 'studio', 'online', 'store', 'space', 'agency', 'digital', 'money', 'sh'}
         features['is_standard_tld'] = 1 if ext.suffix in standard_tlds else 0
         
         suspicious_tlds = {'tk', 'xyz', 'top', 'ml', 'ga', 'cf', 'gq', 'pw', 'cc', 'ru', 'buzz', 'info'}
