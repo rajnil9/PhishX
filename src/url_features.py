@@ -130,6 +130,9 @@ def extract_features(url):
         standard_tlds = {'com', 'org', 'net', 'edu', 'gov', 'io', 'co', 'uk', 'de', 'ca', 'app', 'dev', 'ai', 'in', 'design', 'tech', 'me', 'site', 'cloud', 'studio', 'online', 'store', 'space', 'agency', 'digital', 'money', 'sh', 'so', 'website', 'build', 'style'}
         features['is_standard_tld'] = 1 if ext.suffix in standard_tlds else 0
         
+        trusted_platforms = {'github.io', 'now.sh', 'vercel.app', 'netlify.app', 'pages.dev', 'herokuapp.com', 'web.app', 'firebaseapp.com'}
+        features['is_trusted_platform'] = 1 if f"{ext.domain}.{ext.suffix}" in trusted_platforms else 0
+        
         suspicious_tlds = {'tk', 'xyz', 'top', 'ml', 'ga', 'cf', 'gq', 'pw', 'cc', 'ru', 'buzz', 'info'}
         features['suspicious_tld'] = 1 if ext.suffix in suspicious_tlds else 0
         

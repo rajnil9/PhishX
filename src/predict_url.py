@@ -183,7 +183,17 @@ def main():
                 mathematical_breakdown["step_by_step"].append(
                     f"Step 4: Root Domain Safeguard - The ML model predicted '{original_pred}', but the URL is a clean bare root domain with a standard TLD and no suspicious keywords. Probabilities forcefully overridden to benign=100.0%."
                 )
-
+    elif features.get('is_trusted_platform') == 1 and features.get('subdomain_count', 0) == 1:
+        suspicious_kws = ['login', 'verify', 'secure', 'update', 'account', 'banking', 'wallet']
+        if not any(features.get(f'has_{kw}') == 1 for kw in suspicious_kws):
+            if prediction != "benign":
+                original_pred = prediction
+                prediction = "benign"
+                for cls in class_probabilities:
+                    class_probabilities[cls] = 100.0 if cls == "benign" else 0.0
+                mathematical_breakdown["step_by_step"].append(
+                    f"Step 4: Platform Subdomain Safeguard - The ML model predicted '{original_pred}', but the URL is a clean 1-level subdomain on a trusted developer platform with no suspicious keywords. Probabilities forcefully overridden to benign=100.0%."
+                )
     
     # Generate the human-readable analysis summary
     analysis_summary = generate_analysis_summary(prediction, features)
