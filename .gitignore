@@ -24,6 +24,7 @@ ENV/
 # 4. Raw Dataset Files
 # Large CSVs are best managed locally or downloaded from source.
 dataset/*.csv
+!dataset/Phishing_Email.csv
 
 
 # 5. OS & IDE Specific files
