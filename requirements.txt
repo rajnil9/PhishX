@@ -1,0 +1,11 @@
+# PhishX Machine Learning & Feature Extraction Dependencies
+scikit-learn
+pandas
+numpy
+joblib
+tldextract
+Pillow
+pytesseract
+pyzbar
+ExifRead
+lightgbm

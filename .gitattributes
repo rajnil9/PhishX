@@ -1,0 +1,3 @@
+# PhishX Git attributes configuration
+# Auto detect text files and perform LF normalization
+* text=auto

@@ -1,0 +1,34 @@
+# =========================================================================
+# PhishX - Git Ignore Settings
+# =========================================================================
+
+# 1. Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+
+# 2. Python Runtime Cache & Compiled Files
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ipynb_checkpoints/
+
+# 3. Machine Learning Model Artifacts (Trained .pkl files)
+# These are generated binaries and extremely large (phishshield_url_model.pkl is ~56MB).
+# Pushing these to GitHub will bloat the repository and hit size limits.
+# models/*.pkl
+
+# 4. Raw Dataset Files
+# Large CSVs are best managed locally or downloaded from source.
+dataset/*.csv
+
+
+# 5. OS & IDE Specific files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
