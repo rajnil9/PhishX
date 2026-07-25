@@ -172,6 +172,17 @@ def main():
         mathematical_breakdown["step_by_step"].append(
             f"Step 4: Security Whitelist Override - The ML model originally predicted '{original_pred}', but the domain is a verified safe brand. Probabilities forcefully overridden to benign=100.0%."
         )
+    elif features.get('is_root_domain') == 1 and features.get('subdomain_count', 0) == 0 and features.get('is_standard_tld') == 1:
+        suspicious_kws = ['login', 'verify', 'secure', 'update', 'account', 'banking', 'wallet']
+        if not any(features.get(f'has_{kw}') == 1 for kw in suspicious_kws):
+            if prediction != "benign":
+                original_pred = prediction
+                prediction = "benign"
+                for cls in class_probabilities:
+                    class_probabilities[cls] = 100.0 if cls == "benign" else 0.0
+                mathematical_breakdown["step_by_step"].append(
+                    f"Step 4: Root Domain Safeguard - The ML model predicted '{original_pred}', but the URL is a clean bare root domain with a standard TLD and no suspicious keywords. Probabilities forcefully overridden to benign=100.0%."
+                )
 
     
     # Generate the human-readable analysis summary

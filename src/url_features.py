@@ -7,6 +7,7 @@ Parses URL components, entropy, domain attributes, and suspicious patterns.
 import tldextract
 import re
 import urllib.parse
+import math
 
 def extract_features(url):
     """
@@ -48,12 +49,12 @@ def extract_features(url):
     # ---------------------------------------------------------
     url_lower = cleaned_url.lower()
     # Phishing attacks try to trick users by placing brand names or urgent words in the URL.
-    generic_keywords = ['login', 'verify', 'secure', 'update', 'account', 'banking']
+    generic_keywords = ['login', 'verify', 'secure', 'update', 'account', 'banking', 'wallet']
     brand_keywords = [
         'paypal', 'apple', 'amazon', 'google', 'netflix', 
         'udemy', 'linkedin', 'facebook', 'microsoft', 'instagram', 
         'github', 'twitter', 'unstop', 'coursera', 'wikipedia', 
-        'youtube', 'slack', 'zoom', 'spotify', 'adobe'
+        'youtube', 'slack', 'zoom', 'spotify', 'adobe', 'stripe', 'devbyte'
     ]
     
     for kw in generic_keywords:
@@ -110,13 +111,23 @@ def extract_features(url):
         features['subdomain_count'] = len(subdomains)
         
         # Check for clean root domain structure (e.g. domain.com without complex paths or query params)
-        features['is_root_domain'] = 1 if (not parsed.path or parsed.path == '/') and not parsed.query else 0
+        # Enforce zero subdomains for a true bare root domain
+        features['is_root_domain'] = 1 if (not parsed.path or parsed.path == '/') and not parsed.query and features['subdomain_count'] == 0 else 0
+        
+        # Calculate brand entropy (Shannon entropy) on the domain name to detect DGA/obfuscated domains
+        def shannon_entropy(s):
+            if not s:
+                return 0
+            p, lns = [s.count(c) / len(s) for c in set(s)], len(s)
+            return -sum(count * math.log2(count) for count in p)
+        
+        features['brand_entropy'] = shannon_entropy(ext.domain)
         
         # ---------------------------------------------------------
         # 4. THREAT INTELLIGENCE: SUSPICIOUS TLDs & SHORTENERS
         # ---------------------------------------------------------
         # Standard trusted TLDs vs high-risk abused TLDs
-        standard_tlds = {'com', 'org', 'net', 'edu', 'gov', 'io', 'co', 'uk', 'de', 'ca', 'app', 'dev', 'ai', 'in'}
+        standard_tlds = {'com', 'org', 'net', 'edu', 'gov', 'io', 'co', 'uk', 'de', 'ca', 'app', 'dev', 'ai', 'in', 'design', 'tech', 'me', 'site', 'cloud', 'studio', 'online', 'store', 'space', 'agency', 'digital'}
         features['is_standard_tld'] = 1 if ext.suffix in standard_tlds else 0
         
         suspicious_tlds = {'tk', 'xyz', 'top', 'ml', 'ga', 'cf', 'gq', 'pw', 'cc', 'ru', 'buzz', 'info'}
@@ -162,5 +173,6 @@ def extract_features(url):
         features['defacement_keywords'] = 0
         features['hyphen_in_path_ratio'] = 0.0
         features['digit_in_path_ratio'] = 0.0
+        features['brand_entropy'] = 0.0
         
     return features

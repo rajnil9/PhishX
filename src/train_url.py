@@ -55,9 +55,22 @@ def main():
             augmented_urls = list(set(augmented_urls))
             aug_df = pd.DataFrame({'url': augmented_urls, 'type': ['benign'] * len(augmented_urls)})
             
-            # Combine original and augmented benign, remove duplicates, and sample exactly N
-            combined_benign = pd.concat([class_data, aug_df]).drop_duplicates(subset=['url'])
-            sub = combined_benign.sample(N, random_state=42)
+            # Ensure at least 50% of the benign subset consists of bare root domains
+            aug_sample_size = min(len(aug_df), N // 2)
+            orig_sample_size = N - aug_sample_size
+            
+            aug_sub = aug_df.sample(aug_sample_size, random_state=42)
+            orig_sub = class_data.sample(orig_sample_size, random_state=42)
+            
+            sub = pd.concat([aug_sub, orig_sub]).drop_duplicates(subset=['url'])
+            
+            # If drop_duplicates reduced the size below N, resample from class_data to fill the gap
+            if len(sub) < N:
+                shortfall = N - len(sub)
+                remaining_class_data = class_data[~class_data['url'].isin(sub['url'])]
+                fill_sub = remaining_class_data.sample(min(len(remaining_class_data), shortfall), random_state=42)
+                sub = pd.concat([sub, fill_sub])
+                
             subsets.append(sub)
         else:
             sub = class_data.sample(N, random_state=42)
@@ -89,11 +102,13 @@ def main():
     
     print("Training LGBMClassifier with class balancing and tuned capacity...")
     model = lgb.LGBMClassifier(
-        n_estimators=250,
-        learning_rate=0.04,
-        num_leaves=63,
-        max_depth=8,
-        min_child_samples=15,
+        n_estimators=500,
+        learning_rate=0.03,
+        num_leaves=31,
+        max_depth=6,
+        min_child_samples=30,
+        subsample=0.8,
+        colsample_bytree=0.8,
         class_weight='balanced',
         objective='multiclass',
         random_state=42
